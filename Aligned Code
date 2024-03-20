@@ -1,0 +1,141 @@
+import os
+import pandas as pd
+
+# 変換元と変換先のディレクトリ
+input_directory_1 = 'C:/Users/masap/athletic_1'
+output_directory_1 = 'C:/Users/masap/athletic_2'
+
+input_directory_2 = 'C:/Users/masap/athletic_2'
+output_directory_3 = 'C:/Users/masap/athletic_3'
+
+input_directory_3 = 'C:/Users/masap/athletic_3'
+output_directory_4 = 'C:/Users/masap/athletic_4'
+
+# 変換対象の拡張子
+excel_extension = '.xlsx'
+csv_extension = '.csv'
+
+# 指定された列の順番
+desired_columns = ['Date', 'Time', 'Round', 'Day', 'Venue', 'Result', 'GF', 'GA', 'Opponent', 'xG', 'xGA', 'Poss', 'Attendance', 'Captain',
+            'Formation', 'Referee', 'Standard Gls', 'Standard.1 Sh', 'Standard.2 SoT', 'Standard.3 SoT%', 'Standard.4 G/Sh',
+            'Standard.5 G/SoT', 'Standard.6 Dist', 'Standard.7 FK', 'Standard.8 PK', 'Standard.9 PKatt', 'Expected.1 npxG',
+            'Expected.2 npxG/Sh', 'Expected.3 G-xG', 'Expected.4 np:G-xG', 'Performance SoTA', 'Performance.2 Saves',
+            'Performance.3 Save%', 'Performance.4 CS', 'Performance.5 PSxG', 'Performance.6 PSxG+/-', 'Penalty Kicks.2 PKsv',
+            'Penalty Kicks.3 PKm', 'Launched Cmp', 'Launched.1 Att', 'Launched.2 Cmp%', 'Passes Att (GK)', 'Passes.1 Thr',
+            'Passes.2 Launch%', 'Passes.3 AvgLen', 'Goal Kicks Att', 'Goal Kicks.1 Launch%', 'Goal Kicks.2 AvgLen',
+            'Crosses Opp', 'Crosses.1 Stp', 'Crosses.2 Stp%', 'Sweeper #OPA', 'Sweeper.1 AvgDist', 'Total Cmp', 'Total.1 Att',
+            'Total.2 Cmp%', 'Total.3 TotDist', 'Total.4 PrgDist', 'Short Cmp', 'Short.1 Att', 'Short.2 Cmp%', 'Medium Cmp',
+            'Medium.1 Att', 'Medium.2 Cmp%', 'Long Cmp', 'Long.1 Att', 'Long.2 Cmp%', 'Unnamed: 23 Ast', 'Unnamed: 24 xAG',
+            'Unnamed: 25 xA', 'Unnamed: 26 KP', 'Unnamed: 27 1/3', 'Unnamed: 28 PPA', 'Unnamed: 29 CrsPA', 'Unnamed: 30 PrgP',
+            'Pass Types Live', 'Pass Types.1 Dead', 'Pass Types.2 FK', 'Pass Types.3 TB', 'Pass Types.4 Sw', 'Pass Types.5 Crs',
+            'Pass Types.6 TI', 'Pass Types.7 CK', 'Corner Kicks In', 'Corner Kicks.1 Out', 'Corner Kicks.2 Str', 'Outcomes.1 Off',
+            'Outcomes.2 Blocks', 'SCA Types SCA', 'SCA Types.1 PassLive', 'SCA Types.2 PassDead', 'SCA Types.3 TO',
+            'SCA Types.4 Sh', 'SCA Types.5 Fld', 'SCA Types.6 Def', 'GCA Types GCA', 'GCA Types.1 PassLive', 'GCA Types.2 PassDead',
+            'GCA Types.3 TO', 'GCA Types.4 Sh', 'GCA Types.5 Fld', 'GCA Types.6 Def', 'Tackles Tkl', 'Tackles.1 TklW',
+            'Tackles.2 Def 3rd', 'Tackles.3 Mid 3rd', 'Tackles.4 Att 3rd', 'Challenges Tkl', 'Challenges.1 Att', 'Challenges.2 Tkl%',
+            'Challenges.3 Lost', 'Blocks Blocks', 'Blocks.1 Sh', 'Blocks.2 Pass', 'Unnamed: 21 Int', 'Unnamed: 22 Tkl+Int',
+            'Unnamed: 23 Clr', 'Unnamed: 24 Err', 'Touches Touches', 'Touches.1 Def Pen', 'Touches.2 Def 3rd', 'Touches.3 Mid 3rd',
+            'Touches.4 Att 3rd', 'Touches.5 Att Pen', 'Touches.6 Live', 'Take-Ons Att', 'Take-Ons.1 Succ', 'Take-Ons.2 Succ%',
+            'Take-Ons.3 Tkld', 'Take-Ons.4 Tkld%', 'Carries Carries', 'Carries.1 TotDist', 'Carries.2 PrgDist', 'Carries.3 PrgC',
+            'Carries.4 1/3', 'Carries.5 CPA', 'Carries.6 Mis', 'Carries.7 Dis', 'Receiving Rec', 'Receiving.1 PrgR',
+            'Performance CrdY', 'Performance.1 CrdR', 'Performance.2 2CrdY', 'Performance.3 Fls', 'Performance.4 Fld',
+            'Performance.5 Off', 'Performance.6 Crs', 'Performance.7 Int', 'Performance.8 TklW', 'Performance.9 PKwon',
+            'Performance.10 PKcon', 'Performance.11 OG', 'Performance.12 Recov', 'Aerial Duels Won', 'Aerial Duels.1 Lost',
+            'Aerial Duels.2 Won%']
+
+# athletic_1 ディレクトリ内のExcelファイルに対して処理
+for file_name in os.listdir(input_directory_1):
+    if file_name.endswith(excel_extension):
+        # Excelファイルのパスを構築
+        excel_file_path = os.path.join(input_directory_1, file_name)
+
+        # Excelファイルを読み込む
+        df_excel = pd.read_excel(excel_file_path)
+
+        # 指定された列以外の列を削除
+        df_csv = df_excel[desired_columns]
+
+        # CSVファイルとして保存
+        csv_output_path = os.path.join(output_directory_1, f'{os.path.splitext(file_name)[0]}.csv')
+        df_csv.to_csv(csv_output_path, index=False)
+
+        # Excelファイルとしても保存（拡張子をxlsxに指定）
+        excel_output_path = os.path.join(output_directory_1, f'{os.path.splitext(file_name)[0]}.xlsx')
+        df_csv.to_excel(excel_output_path, index=False)
+
+        # 途中で作成されたCSVファイルを削除
+        csv_path = os.path.join(output_directory_1, f'{os.path.splitext(file_name)[0]}{csv_extension}')
+        if os.path.exists(csv_path):
+            os.remove(csv_path)
+
+print("athletic_1 ディレクトリの変換が完了しました。")
+
+# athletic_2 ディレクトリ内のExcelファイルに対して処理
+excel_files_2 = [file for file in os.listdir(input_directory_2) if file.endswith('.xlsx')]
+
+# 共通項ごとにDataFrameを格納するための辞書
+common_prefix_dict = {}
+
+for file in excel_files_2:
+    file_path = os.path.join(input_directory_2, file)
+    # ファイル名の先頭から"_"までの部分を取得
+    common_prefix = file.split('_')[0]
+
+    # "-Premier-League"と"-Championship"を除く部分を取得
+    common_prefix = common_prefix.replace("-Premier-League", "").replace("-Championship", "")
+    
+    # 共通項ごとにDataFrameを格納するリストを作成
+    if common_prefix not in common_prefix_dict:
+        common_prefix_dict[common_prefix] = []
+
+    # ExcelファイルをDataFrameとして読み込み
+    df = pd.read_excel(file_path)
+
+    # ファイル名と共通する部分を新しい列として追加
+    df['_common_prefix'] = common_prefix
+    common_prefix_dict[common_prefix].append(df)
+
+# 共通項ごとにDataFrameを縦方向に連結
+for common_prefix, dfs in common_prefix_dict.items():
+    result_df = pd.concat(dfs, ignore_index=True)
+
+    # インデックスをリセット
+    result_df.reset_index(drop=True, inplace=True)
+
+    # _common_prefix 列を削除
+    result_df.drop(columns=['_common_prefix'], inplace=True)
+
+    # ファイル名の先頭から"_"までの部分を取得して保存
+    output_file_name = common_prefix
+    output_file_path = os.path.join(output_directory_3, f'{output_file_name}.xlsx')
+
+    # 結果をExcelファイルに保存
+    result_df.to_excel(output_file_path, index=False)
+
+print("athletic_2 ディレクトリの縦向き連結が完了しました。")
+
+# athletic_3 ディレクトリ内のExcelファイルに対して処理
+for filename in os.listdir(input_directory_3):
+    if filename.endswith('.xlsx'):
+        # Excelファイルを読み込む
+        filepath = os.path.join(input_directory_3, filename)
+        df = pd.read_excel(filepath, header=None)  # 見出し行を無視
+
+        # "_sum"を含む行を抽出
+        sum_rows = df[df.iloc[:, 0].str.contains('_sum', na=False)]
+
+        # 抽出した行のみを結合
+        result_df = pd.concat([sum_rows])
+
+        # 新しいファイル名を生成
+        new_filename = filename.replace('.xlsx', '_SeasonData.xlsx')
+        new_filepath = os.path.join(output_directory_4, new_filename)
+
+        # 結果を新しいExcelファイルとして保存
+        result_df.to_excel(new_filepath, index=False, header=False)  # 見出し行を書き込まない
+
+        # 抽出された行を元のファイルから削除して保存
+        df.drop(sum_rows.index, inplace=True)
+        df.to_excel(filepath, index=False, header=False)  # 見出し行を書き込まない
+
+print("athletic_3 ディレクトリの変換と_sumの抽出が完了しました。")
