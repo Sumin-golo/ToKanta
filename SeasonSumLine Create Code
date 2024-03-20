@@ -1,0 +1,50 @@
+import os
+import pandas as pd
+
+# ディレクトリのパス
+directory_path = 'C:/Users/masap/athletic_1/'
+
+# ディレクトリ内のすべてのファイルに対して処理
+for filename in os.listdir(directory_path):
+    if filename.endswith(".xlsx"):
+        file_path = os.path.join(directory_path, filename)
+        
+        # Excelファイルを読み込む
+        df = pd.read_excel(file_path)
+
+        # ステップ0: 行全体が空欄となっている行を削除
+        df = df.dropna(how='all')
+
+        # ステップ1
+        if not df.iloc[:, 0].isnull().any():
+            # 一列目が空欄になっている行が一つもない場合、新しい行を挿入
+            new_row = pd.Series()
+            df = df.append(new_row, ignore_index=True)
+
+        # ステップ2
+        empty_rows = df[df.iloc[:, 0].isnull()]
+        if not empty_rows.empty:
+            # 一列目が空欄になっている行が存在する場合
+            # 修正: 元の一列目にファイル名の"_"より後ろの文字列と"_sum"を結合
+            file_name = os.path.splitext(filename)[0]  # 拡張子を除いたファイル名取得
+            suffix = file_name.split('_')[-1] + '_sum'
+            new_values = suffix
+
+            # 修正: 一列目と二列目に新しい文字列とデータの数を挿入
+            df.loc[empty_rows.index, df.columns[0]] = new_values
+            df.loc[empty_rows.index, df.columns[1]] = df.iloc[:, 5].count()
+
+        # ステップ3
+        condition = (df.iloc[:, 5].isnull() & ~df.iloc[:, 24].isnull())
+        if condition.any():
+            # 6行目が空欄であり、24行目が空欄ではない行が存在する場合
+            target_row_index = condition.idxmax()  # 条件を満たす最初の行のインデックス
+            data_to_shift = df.loc[target_row_index, df.columns[22]:].values
+            df.iloc[-1, 22:] = df.iloc[-1, 22:].shift(len(data_to_shift))
+            df.iloc[-1, 22:] = data_to_shift
+
+        # ステップ4
+        # 変更を元のExcelファイルの形式に変換し、保存
+        df.to_excel(file_path, index=False)
+
+print("処理が完了しました。")
