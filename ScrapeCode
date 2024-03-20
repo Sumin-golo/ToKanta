@@ -1,0 +1,57 @@
+#指定したURL内の表データをExcelファイルとして指定したファイル名で保存#
+
+import os
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+import openpyxl
+import time
+
+# スクレイピング関数
+def scrape_and_save_xlsx(url, url_sheet_df):
+    try:
+        # リクエストを遅らせる（適宜調整）
+        time.sleep(5)
+
+        # URLからHTMLを取得
+        response = requests.get(url)
+        response.raise_for_status()  # Raises an HTTPError for bad responses (4xx or 5xx)
+
+        # BeautifulSoupを使用してHTMLを解析
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # 表を探す（この部分は実際のHTML構造に合わせて変更する必要があります）
+        table = soup.find('table')
+
+        if table is None:
+            raise ValueError('Table not found on the page.')
+
+        # テーブルをDataFrameに変換
+        df = pd.read_html(str(table), header=0)[0]
+
+        # ファイル名を取得（URLsheet.csvの2列目に記載されているファイル名を使用）
+        file_name = url_sheet_df.loc[url_sheet_df['URL'] == url, 'File-Name'].iloc[0]
+
+        # 保存先ディレクトリを指定
+        save_directory = 'C:/Users/masap/athletic_0'  # ローカルのディレクトリに変更
+        os.makedirs(save_directory, exist_ok=True)
+
+        # Excelファイルに書き込み
+        output_file = os.path.join(save_directory, f'{file_name}.xlsx')
+        df.to_excel(output_file, index=False, engine='openpyxl')
+
+        print(f'Successfully scraped and saved data to {output_file}')
+    except requests.RequestException as e:
+        print(f'Error: {e} - Unable to fetch data from {url}')
+    except ValueError as e:
+        print(f'Error: {e} - An issue occurred while processing {url}')
+    except Exception as e:
+        print(f'Error: {e} - An unexpected error occurred while processing {url}')
+
+# URLが格納されているCSVファイルの読み込み
+url_sheet_df = pd.read_csv('C:/Users/masap/URLsheet.csv')  # ローカルのファイルパスに変更
+
+# 各行に対してスクレイピングを実行
+for index, row in url_sheet_df.iterrows():
+    url = row['URL']
+    scrape_and_save_xlsx(url, url_sheet_df)
